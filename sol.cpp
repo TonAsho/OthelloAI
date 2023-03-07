@@ -10,21 +10,18 @@ const int H = 8, W = 8;
 struct Board {
     int_64 PlayerBoard;
     int_64 OpponentBoard;
-    int_64 top_bottom_Mask;
-    int_64 right_left_Mask;
-    int_64 all_side_Mask;
     Board() {
         PlayerBoard   =   0x0000000810000000;
         OpponentBoard =   0x0000001008000000;
-        top_bottom_Mask = 0x00FFFFFFFFFFFF00;
-        right_left_Mask = 0x7e7e7e7e7e7e7e7e;
-        all_side_Mask =   0x007e7e7e7e7e7e00;
+        print_board(can_put(PlayerBoard, OpponentBoard));
     }
 
     //　can_put(player, opponent)置ける場所をビットで返す. m は着手箇所、1ビットのみが1で他はすべて0
     int_64 can_put(int_64 playerboard, int_64 opponentboard) {
         int_64 tmp;
-        int_64 x = x = opponentboard & right_left_Mask;
+        int_64 x = opponentboard & 0x7e7e7e7e7e7e7e7e;
+        int_64 y = opponentboard & 0x00FFFFFFFFFFFF00;
+        int_64 z = opponentboard & 0x007e7e7e7e7e7e00;
         int_64 legal_board;
         int_64 blank_board = ~(playerboard | opponentboard);
 
@@ -44,15 +41,61 @@ struct Board {
         tmp |= (tmp >> 1) & x;
         tmp |= (tmp >> 1) & x;
         tmp |= (tmp >> 1) & x;
-        legal_board = (tmp >> 1) & blank_board;
+        legal_board |= (tmp >> 1) & blank_board;
 
         // 上方向
-        // 下方向
-        // 右斜め上方向
-        // 右斜め下方向
-        // 左斜め上方向
-        // 左斜め下方向
+        tmp = (playerboard << 8) & y;
+        tmp |= (tmp << 8) & y;
+        tmp |= (tmp << 8) & y;
+        tmp |= (tmp << 8) & y;
+        tmp |= (tmp << 8) & y;
+        tmp |= (tmp << 8) & y;
+        legal_board |= (tmp << 8) & blank_board;
 
+        // 下方向
+        tmp = (playerboard >> 8) & y;
+        tmp |= (tmp >> 8) & y;
+        tmp |= (tmp >> 8) & y;
+        tmp |= (tmp >> 8) & y;
+        tmp |= (tmp >> 8) & y;
+        tmp |= (tmp >> 8) & y;
+        legal_board |= (tmp >> 8) & blank_board;
+
+        // 右斜め上方向
+        tmp = (playerboard << 7) & z;
+        tmp |= (tmp << 7) & z;
+        tmp |= (tmp << 7) & z;
+        tmp |= (tmp << 7) & z;
+        tmp |= (tmp << 7) & z;
+        tmp |= (tmp << 7) & z;
+        legal_board |= (tmp << 7) & blank_board;
+
+        // 左斜め上方向
+        tmp = (playerboard << 9) & z;
+        tmp |= (tmp << 9) & z;
+        tmp |= (tmp << 9) & z;
+        tmp |= (tmp << 9) & z;
+        tmp |= (tmp << 9) & z;
+        tmp |= (tmp << 9) & z;
+        legal_board |= (tmp << 9) & blank_board;
+
+        // 右斜め下方向
+        tmp = (playerboard >> 9) & z;
+        tmp |= (tmp >> 9) & z;
+        tmp |= (tmp >> 9) & z;
+        tmp |= (tmp >> 9) & z;
+        tmp |= (tmp >> 9) & z;
+        tmp |= (tmp >> 9) & z;
+        legal_board |= (tmp >> 9) & blank_board;
+
+        // 左斜め下方向
+        tmp = (playerboard >>7) & z;
+        tmp |= (tmp >> 7) & z;
+        tmp |= (tmp >> 7) & z;
+        tmp |= (tmp >> 7) & z;
+        tmp |= (tmp >> 7) & z;
+        tmp |= (tmp >> 7) & z;
+        legal_board |= (tmp >>7) & blank_board;
 
         return legal_board;
     }
@@ -71,6 +114,20 @@ struct Board {
                     cerr << "o";
                 } else if(white & temp) {
                     cerr << "x";
+                } else {
+                    cerr << ".";
+                }
+            }
+            cerr << endl;
+        }
+    }
+    // print_board(bit_board) = 8 * 8に交換
+    void print_board(int_64 x) {
+        rep(i, H) {
+            rep(j, W) {
+                int_64 temp = 1ll << 63-(i*8+j);
+                if(x & temp) {
+                    cerr << "o";
                 } else {
                     cerr << ".";
                 }
