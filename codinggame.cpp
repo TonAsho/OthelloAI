@@ -21,7 +21,7 @@ struct Board {
     int_64 opponentboard;
     int_64 m;
     int counter;
-    int policy; // 盤面に至る直前に打った手
+    int_64 policy; // 盤面に至る直前に打った手
     int value;  // 盤面の仮の評価値(move orderingに使う)
     bool active; // 試合中かどうか.
     Board() {
@@ -48,10 +48,11 @@ struct Board {
 
     // turn_koma()
     void turn_koma(int_64 m) {
-        // if((get_legal_board() & m) == 0) {
-        //     cerr << "そこには置けません." << endl;
-        //     return ;
-        // }
+        if((get_legal_board() & m) == 0) {
+            cerr << "そこには置けません." << endl;
+            return ;
+        }
+        policy = m;
         int_64 res = 0;
         rep(i, 8) {
             int_64 reverse_board = 0;
@@ -353,20 +354,22 @@ int random(int low, int high)
 #include <chrono>
 #include <bitset>
 int main() {
-
-    // 時間計測...........................................................................
-    // std::chrono::system_clock::time_point  start, end;
-    // start = std::chrono::system_clock::now();
-    // ........................................................................
-
     Board board;
-    cin >> id;
+    cin >> id; cin.ignore();
+    cin >> board_size; cin.ignore();
+    field = vector<string>(board_size);
     string s;
-
     while(true) {
-
-        // 入力......................................................................................
-        cin >> s;
+        s = "";
+        rep(i, 8) {
+            string x; cin >> x;
+            s += x;
+        }
+        cin >> action_count; cin.ignore();
+        put = vector<string>(action_count);
+        for (int i = 0; i < action_count; i++) {
+            cin >> put[i]; cin.ignore();
+        }
         int_64 black = 0, white = 0;
         rep(i, 64) {
             if(s[i] == '0') black |= (1ll << (63 - i));
@@ -374,22 +377,15 @@ int main() {
         }
         if(id == 0) board.playerboard = black, board.opponentboard = white;
         else if(id == 1) board.playerboard = white, board.opponentboard = black;
-        // .........................................................................................
 
         board.counter++;
         int_64 m = board.get_legal_board();
         
         // 1手読みAI
-        int p = search(board, 8);
-        cout << p / 8 << " " << p % 8 << endl;
+        int p = search(board, 7);
+        cout << (char)((char)(p % 8) + 'a') << p / 8 + 1 << endl;
 
         board.counter++;
     }
-    
-    // 時間計測...........................................................................
-    // end = std::chrono::system_clock::now();
-    // auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    // cout << msec << endl;
-    //...................................................................................
     return 0;
 }
