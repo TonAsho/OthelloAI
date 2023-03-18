@@ -384,7 +384,7 @@ int evaluate(Board b) {
         z += can_turn_count[b.player][b.board_idx[i]];
     }
     y += not_turn_count[b.player][b.board_idx[0]] + not_turn_count[b.player][b.board_idx[7]] + not_turn_count[b.player][b.board_idx[8]] + not_turn_count[b.player][b.board_idx[15]];
-    int res = x * 2 + y * 11 * 5 + z * 10;
+    int res = x * 2 + y * 11 * 5 + z * 5;
     if (b.player == white)
         res = -res;
     return res;
@@ -617,7 +617,7 @@ int search(Board &b, int depth) {
         
         score = -nega_scout(child_nodes[0], search_depth - 1, false, -beta, -alpha, start);
         alpha = score;
-        now_res = child_nodes[0].policy;
+        res = child_nodes[0].policy;
 
         // 残りの手をnull window searchで探索
         for (i = 1; i < child_nodes.size(); ++i) {
@@ -626,7 +626,7 @@ int search(Board &b, int depth) {
             if (alpha < score) {
                 alpha = score;
                 score = -nega_scout(child_nodes[i], search_depth - 1, false, -beta, -alpha, start);
-                now_res = child_nodes[i].policy;
+                res = child_nodes[i].policy;
             }
             alpha = max(alpha, score);
         }
@@ -634,10 +634,6 @@ int search(Board &b, int depth) {
         transpose_table_upper.clear();
         transpose_table_lower.swap(former_transpose_table_lower);
         transpose_table_lower.clear();
-        if(!flag) res = now_res;
-        else {
-            break;
-        }
     }
     return res;
 }
@@ -645,27 +641,13 @@ int search(Board &b, int depth) {
 int main() {
     board_init();
     evaluate_init();
-    cin >> id; cin.ignore();
-    cin >> board_size; cin.ignore();
-
-    int i, policy;
+    int id, policy; cin >> id;
     string s;
     int arr[64];
     Board b;
     while(true) {
-        s = "";
-        for(i = 0; i < board_size; ++i) {
-            string now_line_board;
-            cin >> now_line_board; cin.ignore();
-            s += now_line_board;
-        }
-        cin >> action_count; cin.ignore();
-        for(i = 0; i < action_count; ++i) {
-            string now_line_action;
-            cin >> now_line_action; cin.ignore();
-        }
-
-        for(i = 0; i < hw2; ++i) {
+        cin >> s;
+        for(int i = 0; i < hw2; ++i) {
             char x = s[i];
             if(x == '1') arr[i] = 1;
             else if(x == '0') arr[i] = 0;
@@ -673,9 +655,9 @@ int main() {
         }
         b.translate_from_arr(arr, id);
         cerr << b.n_stones << endl;
-        if(b.n_stones >= 48) policy = search(b, max(1, 64 - b.n_stones));
-        else policy = search(b, 10);
-        cout<< (char)('a' + policy % 8) << policy / 8 + 1 << endl;
+        if(b.n_stones >= 52) policy = search(b, max(1, 64 - b.n_stones + 1));
+        else policy = search(b, 8);
+        cout << policy / 8 << " " << policy % 8 << endl;
     }
     
 }
